@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function ProfileDetail({ lion }) {
     return (
       <section className="profile-detail">
@@ -39,4 +41,20 @@ export default function ProfileDetail({ lion }) {
       </section>
     );
   }
-  
+
+ProfileDetail.propTypes = {
+  lion: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    part: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    contacts: PropTypes.shape({
+      email: PropTypes.string.isRequired,
+      phone: PropTypes.string.isRequired,
+      website: PropTypes.string.isRequired,
+    }).isRequired,
+    skills: PropTypes.arrayOf(PropTypes.string).isRequired,
+    oneWord: PropTypes.string.isRequired,
+    isMe: PropTypes.bool.isRequired,
+  }).isRequired,
+};

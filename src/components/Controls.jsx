@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function Controls({ totalCount }) {
     return (
       <section className="controls" aria-label="명단 조작">
@@ -66,4 +68,7 @@ export default function Controls({ totalCount }) {
       </section>
     );
   }
-  
+
+Controls.propTypes = {
+  totalCount: PropTypes.number.isRequired,
+};

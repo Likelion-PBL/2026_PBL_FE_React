@@ -1,8 +1,10 @@
-export default function ProfileCard({ lion }) {
+import PropTypes from "prop-types";
+
+export default function ProfileCard({ lion, showBadge = true }) {
     return (
       <article className={`profile-card${lion.isMe ? " is-me" : ""}`}>
         <figure className="profile-image">
-          <span className="profile-badge">{lion.badge}</span>
+          {showBadge && <span className="profile-badge">{lion.badge}</span>}
           <img src={lion.imgSrc} alt="" />
         </figure>
         <section className="profile-content">
@@ -13,4 +15,16 @@ export default function ProfileCard({ lion }) {
       </article>
     );
   }
-  
+
+ProfileCard.propTypes = {
+  lion: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    part: PropTypes.string.isRequired,
+    badge: PropTypes.string.isRequired,
+    introduction: PropTypes.string.isRequired,
+    imgSrc: PropTypes.string.isRequired,
+    isMe: PropTypes.bool.isRequired,
+  }).isRequired,
+  showBadge: PropTypes.bool,
+};
