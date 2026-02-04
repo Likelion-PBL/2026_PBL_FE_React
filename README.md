@@ -1,16 +1,93 @@
-# React + Vite
+# 2026 프론트엔드 PBL (React) 5주차 예시 코드 저장소
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 트랙을 위한 실습 레포지토리입니다.  
+본 레포지토리는 React의 핵심 개념을 직접 코드로 구현하는 데 집중하며,  
+컴포넌트 기반 사고의 기초를 다루는 것을 목표로 합니다.
 
-Currently, two official plugins are available:
+## 레포지토리 목적
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React의 컴포넌트 구조와 JSX 문법을 직접 코드로 구현합니다.
+- Props를 활용한 데이터 흐름을 반복적으로 연습합니다.
+- 컴포넌트 분리와 재사용성에 대한 UI 사고력과 구조 감각을 기르는 것을 목표로 합니다.
+- 본 레포지토리는 React 기반 커리큘럼(5주차)을 포함합니다.
+- 1~4주차 Vanilla(HTML/CSS/JS) 학습은 별도의 레포지토리에서 진행됩니다.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 주차별 학습 내용
 
-## Expanding the ESLint configuration
+### 5주차: React 기초 & 컴포넌트
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| 항목 | 내용 |
+|------|------|
+| **학습 키워드** | React 개요, JSX 문법, 컴포넌트 분리, Props 전달 |
+| **PBL 미션** | 아기사자 자기소개 페이지 UI를 React로 재구성하기 |
+
+---
+
+## 디렉토리 구조
+
+```
+📁 src/
+├── main.jsx           # 앱 진입점
+├── App.jsx            # 루트 컴포넌트
+├── components/        # 재사용 컴포넌트 (예시)
+│   ├── Controls.jsx
+│   ├── LionForm.jsx
+│   ├── ProfileCard.jsx
+│   ├── ProfileCardGrid.jsx
+│   ├── ProfileDetail.jsx
+│   └── ProfileDetailList.jsx
+├── data/              # mock 데이터 파일
+│   └── lions.js
+├── styles/            # 스타일시트
+│   └── style.css
+└── assets/            # 이미지 등 정적 자원
+```
+
+---
+
+## 예시 코드 확인 방법
+
+각 주차별 예시 코드는 **브랜치**로 분리되어 있습니다.
+
+| 브랜치명 | 설명 |
+|----------|------|
+| `week-5` | 5주차 기본 과제 예시 |
+| `week-5-bonus` | 5주차 보너스 과제 예시 |
+
+### 브랜치 전환 방법
+
+```bash
+# 원하는 주차의 브랜치로 전환
+git checkout week-5        # 5주차 기본 과제
+git checkout week-5-bonus  # 5주차 보너스 과제
+```
+
+---
+
+## 로컬 실행 방법
+
+```bash
+# 의존성 설치
+yarn install
+
+# 개발 서버 실행
+yarn dev
+```
+
+개발 서버가 실행되면 `http://localhost:5173`에서 확인할 수 있습니다.
+
+---
+
+## 기술 스택
+
+- **React** 19
+- **Vite** 7
+- **ESLint** 9
+
+---
+
+## 참고 사항
+
+- 이 레포지토리의 코드는 **참고용 예시**입니다.
