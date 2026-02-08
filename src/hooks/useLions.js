@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { lions as initialLions } from "../data/lions.js";
 import { fetchRandomUsers } from "../utils/api.js";
 import { createLionFromRandomUser, createLionFromFormData } from "../utils/lion.js";
@@ -97,14 +98,41 @@ export function useFetchStatus() {
 
 
 export function useViewOptions() {
-  const [partFilter, setPartFilter] = useState("ALL");
-  const [sortOption, setSortOption] = useState("latest");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(() => searchParams.get("q") || "");
+
+  const partFilter = searchParams.get("part") || "ALL";
+  const sortOption = searchParams.get("sort") || "latest";
+
+  function updateParam(key, value, defaultValue) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value === defaultValue) {
+        next.delete(key);
+      } else {
+        next.set(key, value);
+      }
+      return next;
+    });
+  }
+
+  function setPartFilter(value) {
+    updateParam("part", value, "ALL");
+  }
+
+  function setSortOption(value) {
+    updateParam("sort", value, "latest");
+  }
+
+  function setSearchQuery(value) {
+    setSearchInput(value);
+    updateParam("q", value, "");
+  }
 
   return {
     partFilter,
     sortOption,
-    searchQuery,
+    searchQuery: searchInput,
     setPartFilter,
     setSortOption,
     setSearchQuery,

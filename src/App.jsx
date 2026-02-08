@@ -1,10 +1,7 @@
-import { useState } from "react";
-import { useLions, useFetchStatus, useViewOptions } from "./hooks/useLions.js";
-import { filterAndSortLions } from "./utils/lion.js";
-import { ControlsSection, MainControls, FetchControls, ViewOptions } from "./components/Controls.jsx";
-import LionForm from "./components/LionForm.jsx";
-import ProfileCardGrid from "./components/ProfileCardGrid.jsx";
-import ProfileDetailList from "./components/ProfileDetailList.jsx";
+import { Routes, Route } from "react-router-dom";
+import { useLions, useFetchStatus } from "./hooks/useLions.js";
+import HomePage from "./pages/HomePage.jsx";
+import LionDetailPage from "./pages/LionDetailPage.jsx";
 
 export default function App() {
   const { lions, addLion, removeLion, appendRandomLions, refreshAll, getRandomFormData } =
@@ -12,60 +9,32 @@ export default function App() {
 
   const { isLoading, statusMessage, showRetry, runAction, retry } = useFetchStatus();
 
-  const { partFilter, sortOption, searchQuery, setPartFilter, setSortOption, setSearchQuery } =
-    useViewOptions();
-
-  const [isFormVisible, setIsFormVisible] = useState(false);
-
-  const visibleLions = filterAndSortLions(lions, { partFilter, sortOption, searchQuery });
-
-  function handleAddLion(formData) {
-    addLion(formData);
-    setIsFormVisible(false);
-  }
-
   return (
     <main className="container">
-      <ControlsSection>
-        <MainControls
-          totalCount={lions.length}
-          isLoading={isLoading}
-          onToggleForm={() => setIsFormVisible((prev) => !prev)}
-          onRemoveLion={removeLion}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <HomePage
+              lions={lions}
+              isLoading={isLoading}
+              statusMessage={statusMessage}
+              showRetry={showRetry}
+              addLion={addLion}
+              removeLion={removeLion}
+              appendRandomLions={appendRandomLions}
+              refreshAll={refreshAll}
+              getRandomFormData={getRandomFormData}
+              runAction={runAction}
+              retry={retry}
+            />
+          }
         />
-
-        <FetchControls
-          isLoading={isLoading}
-          statusMessage={statusMessage}
-          showRetry={showRetry}
-          onAppendOne={() => runAction(() => appendRandomLions(1))}
-          onAppendFive={() => runAction(() => appendRandomLions(5))}
-          onRefreshAll={() => runAction(refreshAll)}
-          onRetry={retry}
+        <Route
+          path="/lions/:id"
+          element={<LionDetailPage lions={lions} />}
         />
-
-        <ViewOptions
-          partFilter={partFilter}
-          sortOption={sortOption}
-          searchQuery={searchQuery}
-          onPartFilterChange={setPartFilter}
-          onSortChange={setSortOption}
-          onSearchChange={setSearchQuery}
-        />
-      </ControlsSection>
-
-      <LionForm
-        isVisible={isFormVisible}
-        isLoading={isLoading}
-        onSubmit={handleAddLion}
-        onCancel={() => setIsFormVisible(false)}
-        getRandomFormData={getRandomFormData}
-        runAction={runAction}
-      />
-
-      <ProfileCardGrid lions={visibleLions} />
-
-      <ProfileDetailList lions={visibleLions} />
+      </Routes>
     </main>
   );
 }
