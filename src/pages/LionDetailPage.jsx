@@ -1,30 +1,23 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ProfileDetail from "../components/ProfileDetail.jsx";
 
 export default function LionDetailPage({ lions }) {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const lion = lions.find((l) => String(l.id) === id);
 
   if (!lion) {
     return (
       <section className="empty-state">
-        <p>해당 아기 사자를 찾을 수 없습니다.</p>
-        <button type="button" className="control-btn" onClick={() => navigate("/")}>
+        <h2>아기 사자를 찾을 수 없습니다</h2>
+        <p>id가 {id}인 아기 사자가 명단에 존재하지 않습니다.</p>
+        <Link to="/" className="control-btn">
           목록으로 돌아가기
-        </button>
+        </Link>
       </section>
     );
   }
 
-  return (
-    <>
-      <button type="button" className="control-btn" onClick={() => navigate("/")}>
-        ← 목록으로
-      </button>
-
-      <ProfileDetail lion={lion} />
-    </>
-  );
+  return <ProfileDetail lion={lion} />;
 }
