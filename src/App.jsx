@@ -1,20 +1,71 @@
-
-import { lions } from "./data/lions.js";
-import Controls from "./components/Controls.jsx";
+import { useState } from "react";
+import { useLions, useFetchStatus, useViewOptions } from "./hooks/useLions.js";
+import { filterAndSortLions } from "./utils/lion.js";
+import { ControlsSection, MainControls, FetchControls, ViewOptions } from "./components/Controls.jsx";
 import LionForm from "./components/LionForm.jsx";
 import ProfileCardGrid from "./components/ProfileCardGrid.jsx";
 import ProfileDetailList from "./components/ProfileDetailList.jsx";
 
 export default function App() {
+  const { lions, addLion, removeLion, appendRandomLions, refreshAll, getRandomFormData } =
+    useLions();
+
+  const { isLoading, statusMessage, showRetry, runAction, retry } = useFetchStatus();
+
+  const { partFilter, sortOption, searchQuery, setPartFilter, setSortOption, setSearchQuery } =
+    useViewOptions();
+
+  const [isFormVisible, setIsFormVisible] = useState(false);
+
+  const visibleLions = filterAndSortLions(lions, { partFilter, sortOption, searchQuery });
+
+  function handleAddLion(formData) {
+    addLion(formData);
+    setIsFormVisible(false);
+  }
+
   return (
     <main className="container">
-      <Controls totalCount={lions.length} />
+      <ControlsSection>
+        <MainControls
+          totalCount={lions.length}
+          isLoading={isLoading}
+          onToggleForm={() => setIsFormVisible((prev) => !prev)}
+          onRemoveLion={removeLion}
+        />
 
-      <LionForm />
+        <FetchControls
+          isLoading={isLoading}
+          statusMessage={statusMessage}
+          showRetry={showRetry}
+          onAppendOne={() => runAction(() => appendRandomLions(1))}
+          onAppendFive={() => runAction(() => appendRandomLions(5))}
+          onRefreshAll={() => runAction(refreshAll)}
+          onRetry={retry}
+        />
 
-      <ProfileCardGrid lions={lions} />
+        <ViewOptions
+          partFilter={partFilter}
+          sortOption={sortOption}
+          searchQuery={searchQuery}
+          onPartFilterChange={setPartFilter}
+          onSortChange={setSortOption}
+          onSearchChange={setSearchQuery}
+        />
+      </ControlsSection>
 
-      <ProfileDetailList lions={lions} />
+      <LionForm
+        isVisible={isFormVisible}
+        isLoading={isLoading}
+        onSubmit={handleAddLion}
+        onCancel={() => setIsFormVisible(false)}
+        getRandomFormData={getRandomFormData}
+        runAction={runAction}
+      />
+
+      <ProfileCardGrid lions={visibleLions} />
+
+      <ProfileDetailList lions={visibleLions} />
     </main>
   );
 }
