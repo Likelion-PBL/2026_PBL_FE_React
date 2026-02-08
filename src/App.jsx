@@ -7,21 +7,33 @@ import ProfileCardGrid from "./components/ProfileCardGrid.jsx";
 import ProfileDetailList from "./components/ProfileDetailList.jsx";
 
 export default function App() {
-  const { lions, addLion, removeLion, appendRandomLions, refreshAll, getRandomFormData } =
+  const { lions, isInitialLoading, addLion, removeLion, appendRandomLions, refreshAll, getRandomFormData } =
     useLions();
 
   const { isLoading, statusMessage, showRetry, runAction, retry } = useFetchStatus();
 
-  const { partFilter, sortOption, searchQuery, setPartFilter, setSortOption, setSearchQuery } =
-    useViewOptions();
+  const {
+    partFilter, sortOption, searchQuery, debouncedSearchQuery, isSearchPending,
+    setPartFilter, setSortOption, setSearchQuery,
+  } = useViewOptions();
 
   const [isFormVisible, setIsFormVisible] = useState(false);
 
-  const visibleLions = filterAndSortLions(lions, { partFilter, sortOption, searchQuery });
+  const visibleLions = filterAndSortLions(lions, { partFilter, sortOption, searchQuery: debouncedSearchQuery });
 
   function handleAddLion(formData) {
     addLion(formData);
     setIsFormVisible(false);
+  }
+
+  if (isInitialLoading) {
+    return (
+      <main className="container">
+        <p className="fetch-status" role="status" aria-live="polite">
+          명단을 불러오는 중...
+        </p>
+      </main>
+    );
   }
 
   return (
@@ -48,6 +60,7 @@ export default function App() {
           partFilter={partFilter}
           sortOption={sortOption}
           searchQuery={searchQuery}
+          isSearchPending={isSearchPending}
           onPartFilterChange={setPartFilter}
           onSortChange={setSortOption}
           onSearchChange={setSearchQuery}

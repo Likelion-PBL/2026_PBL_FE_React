@@ -73,6 +73,7 @@ export function ViewOptions({
   partFilter,
   sortOption,
   searchQuery,
+  isSearchPending,
   onPartFilterChange,
   onSortChange,
   onSearchChange,
@@ -119,6 +120,12 @@ export function ViewOptions({
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
       />
+
+      {isSearchPending && (
+        <p className="fetch-status" role="status" aria-live="polite">
+          검색 중...
+        </p>
+      )}
     </div>
   );
 }

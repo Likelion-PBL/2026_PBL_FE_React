@@ -1,15 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { lions as initialLions } from "../data/lions.js";
 import { fetchRandomUsers } from "../utils/api.js";
 import { createLionFromRandomUser, createLionFromFormData } from "../utils/lion.js";
 
 const STATUS_MESSAGE_RESET_DELAY_MS = 900;
 
+const INITIAL_ME = initialLions.find((lion) => lion.isMe) || null;
+const INITIAL_FETCH_COUNT = initialLions.length - (INITIAL_ME ? 1 : 0);
 const INITIAL_NEXT_ID = initialLions.reduce((max, lion) => Math.max(max, lion.id), 0) + 1;
 
+const STORAGE_KEY_LIONS = "lions";
+const STORAGE_KEY_NEXT_ID = "lions_nextId";
+
+function loadFromStorage() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_LIONS);
+    const storedNextId = localStorage.getItem(STORAGE_KEY_NEXT_ID);
+    if (stored) {
+      return {
+        lions: JSON.parse(stored),
+        nextId: storedNextId ? Number(storedNextId) : INITIAL_NEXT_ID,
+      };
+    }
+  } catch (error) {
+    console.error("localStorage 복원 실패:", error);
+  }
+  return null;
+}
+
 export function useLions() {
-  const [lions, setLions] = useState(initialLions);
-  const [nextId, setNextId] = useState(INITIAL_NEXT_ID);
+  const saved = loadFromStorage();
+  const hasSavedData = saved !== null;
+
+  const [lions, setLions] = useState(
+    hasSavedData ? saved.lions : (INITIAL_ME ? [INITIAL_ME] : [])
+  );
+  const [nextId, setNextId] = useState(
+    hasSavedData ? saved.nextId : INITIAL_NEXT_ID
+  );
+  const [isInitialLoading, setIsInitialLoading] = useState(!hasSavedData);
+
+  useEffect(() => {
+    if (hasSavedData) return;
+
+    let cancelled = false;
+
+    async function loadInitialLions() {
+      try {
+        const users = await fetchRandomUsers(INITIAL_FETCH_COUNT);
+        if (cancelled) return;
+
+        const fetched = users.map((user, index) =>
+          createLionFromRandomUser(user, INITIAL_NEXT_ID + index)
+        );
+
+        setLions(INITIAL_ME ? [INITIAL_ME, ...fetched] : fetched);
+        setNextId(INITIAL_NEXT_ID + fetched.length);
+      } catch (error) {
+        console.error("초기 데이터 로드 실패:", error);
+        if (cancelled) return;
+        setLions(initialLions);
+      } finally {
+        if (!cancelled) setIsInitialLoading(false);
+      }
+    }
+
+    loadInitialLions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasSavedData]);
+
+  useEffect(() => {
+    if (isInitialLoading) return;
+
+    localStorage.setItem(STORAGE_KEY_LIONS, JSON.stringify(lions));
+    localStorage.setItem(STORAGE_KEY_NEXT_ID, String(nextId));
+  }, [lions, nextId, isInitialLoading]);
 
   function addLion(formData) {
     const newLion = createLionFromFormData(formData, nextId);
@@ -55,6 +123,7 @@ export function useLions() {
 
   return {
     lions,
+    isInitialLoading,
     addLion,
     removeLion,
     appendRandomLions,
@@ -96,15 +165,30 @@ export function useFetchStatus() {
 }
 
 
+const SEARCH_DEBOUNCE_DELAY_MS = 300;
+
 export function useViewOptions() {
   const [partFilter, setPartFilter] = useState("ALL");
   const [sortOption, setSortOption] = useState("latest");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, SEARCH_DEBOUNCE_DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const isSearchPending = searchQuery !== debouncedSearchQuery;
 
   return {
     partFilter,
     sortOption,
     searchQuery,
+    debouncedSearchQuery,
+    isSearchPending,
     setPartFilter,
     setSortOption,
     setSearchQuery,
