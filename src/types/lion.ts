@@ -1,3 +1,5 @@
+import type { LionRow } from "./database";
+
 export interface Contacts {
   email: string;
   phone: string;
@@ -16,6 +18,7 @@ export interface Lion {
   skills: string[];
   oneWord: string;
   isMe: boolean;
+  createdAt?: string;
 }
 
 export type Part = "Frontend" | "Backend" | "Design";
@@ -56,4 +59,26 @@ export interface ViewOptionsState {
   partFilter: string;
   sortOption: string;
   searchQuery: string;
+}
+
+// 데이터베이스 Row를 앱에서 사용하는 Lion 타입으로 변환
+export function lionFromRow(row: LionRow): Lion {
+  return {
+    id: row.id,
+    name: row.name,
+    part: row.part as Part,
+    badge: row.badge || "",
+    introduction: row.introduction || "",
+    imgSrc: row.img_src || `https://picsum.photos/seed/${row.id}/200/200`,
+    description: row.description || "",
+    contacts: {
+      email: row.email || "",
+      phone: row.phone || "",
+      website: row.website || "",
+    },
+    skills: row.skills || [],
+    oneWord: row.one_word || "",
+    isMe: row.is_me,
+    createdAt: row.created_at || undefined,
+  };
 }

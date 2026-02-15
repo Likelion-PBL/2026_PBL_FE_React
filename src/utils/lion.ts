@@ -1,4 +1,4 @@
-import type { Lion, Part, LionFormData, RandomUser, ViewOptionsState } from "../types/lion";
+import type { Lion, Part, RandomUser, ViewOptionsState } from "../types/lion";
 
 const SKILLS_BY_PART: Record<Part, string[]> = {
   Backend: ["Node.js", "Spring", "Database"],
@@ -44,11 +44,11 @@ export function createLionFromRandomUser(user: RandomUser, id: number): Lion {
     skills,
     introduction: `${part} · ${country} ${city}에서 합류했어요!`,
     description: [
-      "6주차 미션에서 useState와 useEffect로 상태를 관리하는 연습을 하고 있습니다.",
-      "React의 상태가 변하면 UI가 자동으로 다시 렌더링되는 흐름을 이해하려고 합니다.",
-      '"상태가 UI를 만든다"는 React의 핵심 원리를 체득하는 것입니다.',
+      "Supabase와 연동하여 데이터를 저장하고 불러오는 연습을 하고 있습니다.",
+      "클라우드 데이터베이스를 활용해 영구적인 데이터 관리를 경험하고 있습니다.",
+      "BaaS를 통해 별도의 백엔드 없이 풀스택 개발을 체험하는 것이 목표입니다.",
     ].join(" "),
-    oneWord: "상태가 바뀌면 UI도 바뀐다!",
+    oneWord: "클라우드 DB로 데이터를 영구 저장!",
     imgSrc: user?.picture?.large || `https://picsum.photos/seed/${id}/200/200`,
     isMe: false,
     contacts: {
@@ -56,28 +56,7 @@ export function createLionFromRandomUser(user: RandomUser, id: number): Lion {
       phone: user?.phone || "",
       website: `https://example.com/${user?.login?.username || `lion${id}`}`,
     },
-  };
-}
-
-export function createLionFromFormData(formData: LionFormData, id: number): Lion {
-  const skills = parseSkills(formData.skills);
-
-  return {
-    id,
-    name: formData.name.trim(),
-    part: formData.part,
-    badge: skills[0],
-    skills,
-    introduction: formData.oneLineIntro.trim(),
-    description: formData.description.trim(),
-    oneWord: formData.oneWord.trim(),
-    imgSrc: `https://picsum.photos/seed/${id}/200/200`,
-    isMe: false,
-    contacts: {
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
-      website: formData.website.trim(),
-    },
+    createdAt: new Date().toISOString(),
   };
 }
 
@@ -99,7 +78,13 @@ export function filterAndSortLions(
   if (sortOption === "name") {
     result.sort((a, b) => a.name.localeCompare(b.name));
   } else {
-    result.sort((a, b) => b.id - a.id);
+    // 최신순: createdAt 또는 id 기준
+    result.sort((a, b) => {
+      if (a.createdAt && b.createdAt) {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+      return b.id - a.id;
+    });
   }
 
   return result;

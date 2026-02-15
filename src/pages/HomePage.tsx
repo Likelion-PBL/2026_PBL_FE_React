@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useViewOptions } from "../hooks/useLions";
 import { filterAndSortLions } from "../utils/lion";
 import { ControlsSection, MainControls, FetchControls, ViewOptions } from "../components/Controls";
@@ -8,11 +9,13 @@ import type { Lion, LionFormData } from "../types/lion";
 
 interface HomePageProps {
   lions: Lion[];
+  isInitialLoading: boolean;
   isLoading: boolean;
   statusMessage: string;
   showRetry: boolean;
-  addLion: (formData: LionFormData) => void;
-  removeLion: () => void;
+  isAuthenticated: boolean;
+  addLion: (formData: LionFormData) => Promise<void>;
+  removeLion: () => Promise<void>;
   appendRandomLions: (count: number) => Promise<void>;
   refreshAll: () => Promise<void>;
   getRandomFormData: () => Promise<Lion>;
@@ -22,9 +25,11 @@ interface HomePageProps {
 
 export default function HomePage({
   lions,
+  isInitialLoading,
   isLoading,
   statusMessage,
   showRetry,
+  isAuthenticated,
   addLion,
   removeLion,
   appendRandomLions,
@@ -40,25 +45,42 @@ export default function HomePage({
 
   const visibleLions = filterAndSortLions(lions, { partFilter, sortOption, searchQuery });
 
-  function handleAddLion(formData: LionFormData): void {
-    addLion(formData);
-    setIsFormVisible(false);
+  async function handleAddLion(formData: LionFormData): Promise<void> {
+    await runAction(async () => {
+      await addLion(formData);
+      setIsFormVisible(false);
+    });
+  }
+
+  if (isInitialLoading) {
+    return <div className="loading-state">명단을 불러오는 중...</div>;
   }
 
   return (
     <>
+      {/* 비로그인 시 안내 메시지 */}
+      {!isAuthenticated && (
+        <div className="auth-notice">
+          <p>
+            명단을 수정하려면 <Link to="/login">로그인</Link>이 필요합니다.
+          </p>
+        </div>
+      )}
+
       <ControlsSection>
         <MainControls
           totalCount={lions.length}
           isLoading={isLoading}
+          isAuthenticated={isAuthenticated}
           onToggleForm={() => setIsFormVisible((prev) => !prev)}
-          onRemoveLion={removeLion}
+          onRemoveLion={() => runAction(removeLion)}
         />
 
         <FetchControls
           isLoading={isLoading}
           statusMessage={statusMessage}
           showRetry={showRetry}
+          isAuthenticated={isAuthenticated}
           onAppendOne={() => runAction(() => appendRandomLions(1))}
           onAppendFive={() => runAction(() => appendRandomLions(5))}
           onRefreshAll={() => runAction(refreshAll)}
@@ -75,14 +97,16 @@ export default function HomePage({
         />
       </ControlsSection>
 
-      <LionForm
-        isVisible={isFormVisible}
-        isLoading={isLoading}
-        onSubmit={handleAddLion}
-        onCancel={() => setIsFormVisible(false)}
-        getRandomFormData={getRandomFormData}
-        runAction={runAction}
-      />
+      {isAuthenticated && (
+        <LionForm
+          isVisible={isFormVisible}
+          isLoading={isLoading}
+          onSubmit={handleAddLion}
+          onCancel={() => setIsFormVisible(false)}
+          getRandomFormData={getRandomFormData}
+          runAction={runAction}
+        />
+      )}
 
       <ProfileCardGrid lions={visibleLions} />
     </>

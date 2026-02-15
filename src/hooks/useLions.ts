@@ -1,64 +1,176 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { lions as initialLions } from "../data/lions";
+import { supabase } from "../lib/supabase";
 import { fetchRandomUsers } from "../utils/api";
-import { createLionFromRandomUser, createLionFromFormData } from "../utils/lion";
+import { createLionFromRandomUser } from "../utils/lion";
+import { lionFromRow } from "../types/lion";
 import type { Lion, LionFormData } from "../types/lion";
+import type { LionInsert } from "../types/database";
 
 const STATUS_MESSAGE_RESET_DELAY_MS = 900;
 
-const INITIAL_NEXT_ID = initialLions.reduce((max, lion) => Math.max(max, lion.id), 0) + 1;
-
 export function useLions() {
-  const [lions, setLions] = useState<Lion[]>(initialLions);
-  const [nextId, setNextId] = useState(INITIAL_NEXT_ID);
+  const [lions, setLions] = useState<Lion[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  function addLion(formData: LionFormData): void {
-    const newLion = createLionFromFormData(formData, nextId);
-    setLions((prev) => [...prev, newLion]);
-    setNextId((prev) => prev + 1);
+  // 최초 데이터 로드
+  useEffect(() => {
+    loadLions();
+  }, []);
+
+  async function loadLions(): Promise<void> {
+    const { data, error } = await supabase
+      .from("lions")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Failed to load lions:", error);
+      return;
+    }
+
+    setLions(data.map(lionFromRow));
+    setIsInitialLoading(false);
   }
 
-  function removeLion(): void {
+  async function addLion(formData: LionFormData): Promise<void> {
+    const skills = formData.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const newLion: LionInsert = {
+      name: formData.name.trim(),
+      part: formData.part,
+      badge: skills[0] || null,
+      introduction: formData.oneLineIntro.trim(),
+      description: formData.description.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      website: formData.website.trim(),
+      skills,
+      one_word: formData.oneWord.trim(),
+      is_me: false,
+    };
+
+    const { data, error } = await supabase
+      .from("lions")
+      .insert(newLion)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    setLions((prev) => [lionFromRow(data), ...prev]);
+  }
+
+  async function removeLion(id: number): Promise<void> {
+    const { error } = await supabase.from("lions").delete().eq("id", id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    setLions((prev) => prev.filter((lion) => lion.id !== id));
+  }
+
+  async function removeLastLion(): Promise<void> {
     if (lions.length === 0) return;
-    setLions((prev) => prev.slice(0, -1));
+
+    const lastLion = lions[lions.length - 1];
+    await removeLion(lastLion.id);
   }
 
   async function appendRandomLions(count: number): Promise<void> {
     const users = await fetchRandomUsers(count);
-    const newLions = users.map((user, index) =>
-      createLionFromRandomUser(user, nextId + index)
-    );
-    setLions((prev) => [...prev, ...newLions]);
-    setNextId((prev) => prev + users.length);
+
+    const newLions: LionInsert[] = users.map((user) => {
+      const lion = createLionFromRandomUser(user, 0);
+      return {
+        name: lion.name,
+        part: lion.part,
+        badge: lion.badge,
+        introduction: lion.introduction,
+        description: lion.description,
+        email: lion.contacts.email,
+        phone: lion.contacts.phone,
+        website: lion.contacts.website,
+        skills: lion.skills,
+        one_word: lion.oneWord,
+        is_me: false,
+        img_src: lion.imgSrc,
+      };
+    });
+
+    const { data, error } = await supabase.from("lions").insert(newLions).select();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    setLions((prev) => [...data.map(lionFromRow), ...prev]);
   }
 
   async function refreshAll(): Promise<void> {
-    const me = lions.find((lion) => lion.isMe);
-    const fetchCount = me ? Math.max(0, lions.length - 1) : lions.length;
+    // 기존 데이터 중 is_me가 아닌 것들의 수만큼 새로 불러오기
+    const nonMeLions = lions.filter((lion) => !lion.isMe);
+    const fetchCount = nonMeLions.length || 5; // 최소 5명
 
-    if (fetchCount === 0) return;
+    // 기존 non-me 삭제
+    if (nonMeLions.length > 0) {
+      const ids = nonMeLions.map((lion) => lion.id);
+      const { error: deleteError } = await supabase.from("lions").delete().in("id", ids);
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
+    }
 
+    // 새 데이터 추가
     const users = await fetchRandomUsers(fetchCount);
-    const newLions = users.map((user, index) =>
-      createLionFromRandomUser(user, nextId + index)
-    );
+    const newLions: LionInsert[] = users.map((user) => {
+      const lion = createLionFromRandomUser(user, 0);
+      return {
+        name: lion.name,
+        part: lion.part,
+        badge: lion.badge,
+        introduction: lion.introduction,
+        description: lion.description,
+        email: lion.contacts.email,
+        phone: lion.contacts.phone,
+        website: lion.contacts.website,
+        skills: lion.skills,
+        one_word: lion.oneWord,
+        is_me: false,
+        img_src: lion.imgSrc,
+      };
+    });
 
-    setLions(me ? [me, ...newLions] : newLions);
-    setNextId((prev) => prev + fetchCount);
+    const { data, error } = await supabase.from("lions").insert(newLions).select();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const meLions = lions.filter((lion) => lion.isMe);
+    setLions([...data.map(lionFromRow), ...meLions]);
   }
 
   async function getRandomFormData(): Promise<Lion> {
     const users = await fetchRandomUsers(1);
     const user = users[0];
     if (!user) throw new Error("랜덤 유저를 불러오지 못했습니다.");
-    return createLionFromRandomUser(user, nextId);
+    return createLionFromRandomUser(user, 0);
   }
 
   return {
     lions,
+    isInitialLoading,
+    loadLions,
     addLion,
     removeLion,
+    removeLastLion,
     appendRandomLions,
     refreshAll,
     getRandomFormData,

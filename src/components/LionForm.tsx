@@ -29,7 +29,7 @@ const INITIAL_FORM_STATE: FormState = {
 interface LionFormProps {
   isVisible: boolean;
   isLoading: boolean;
-  onSubmit: (formData: LionFormData) => void;
+  onSubmit: (formData: LionFormData) => Promise<void>;
   onCancel: () => void;
   getRandomFormData: () => Promise<Lion>;
   runAction: (actionFn: () => Promise<void>) => Promise<void>;
@@ -64,7 +64,7 @@ export default function LionForm({
     setFormData(INITIAL_FORM_STATE);
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
 
     const isFormValid =
@@ -80,7 +80,7 @@ export default function LionForm({
 
     if (!isFormValid) return;
 
-    onSubmit(formData);
+    await onSubmit(formData);
     resetForm();
   }
 
