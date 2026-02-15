@@ -3,9 +3,17 @@ import type { Lion } from "../types/lion";
 
 interface ProfileCardGridProps {
   lions: Lion[];
+  isOwnLion: (lion: Lion) => boolean;
+  canDelete: (lion: Lion) => boolean;
+  onDeleteLion: (id: number) => void;
 }
 
-export default function ProfileCardGrid({ lions }: ProfileCardGridProps) {
+export default function ProfileCardGrid({
+  lions,
+  isOwnLion,
+  canDelete,
+  onDeleteLion,
+}: ProfileCardGridProps) {
   if (!lions || lions.length === 0) {
     return (
       <section className="profile-card-grid">
@@ -17,7 +25,13 @@ export default function ProfileCardGrid({ lions }: ProfileCardGridProps) {
   return (
     <section className="profile-card-grid">
       {lions.map((lion) => (
-        <ProfileCard key={lion.id} lion={lion} />
+        <ProfileCard
+          key={lion.id}
+          lion={lion}
+          isOwn={isOwnLion(lion)}
+          canDelete={canDelete(lion)}
+          onDelete={() => onDeleteLion(lion.id)}
+        />
       ))}
     </section>
   );

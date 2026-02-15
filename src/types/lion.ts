@@ -19,6 +19,8 @@ export interface Lion {
   oneWord: string;
   isMe: boolean;
   createdAt?: string;
+  createdBy?: string | null;
+  isPending?: boolean;
 }
 
 export type Part = "Frontend" | "Backend" | "Design";
@@ -61,7 +63,6 @@ export interface ViewOptionsState {
   searchQuery: string;
 }
 
-// 데이터베이스 Row를 앱에서 사용하는 Lion 타입으로 변환
 export function lionFromRow(row: LionRow): Lion {
   return {
     id: row.id,
@@ -80,5 +81,6 @@ export function lionFromRow(row: LionRow): Lion {
     oneWord: row.one_word || "",
     isMe: row.is_me,
     createdAt: row.created_at || undefined,
+    createdBy: row.created_by,
   };
 }

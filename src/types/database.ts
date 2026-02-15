@@ -17,6 +17,7 @@ export interface Database {
           one_word: string | null;
           is_me: boolean;
           created_at: string;
+          created_by: string | null;
         };
         Insert: {
           id?: number;
@@ -33,6 +34,7 @@ export interface Database {
           one_word?: string | null;
           is_me?: boolean;
           created_at?: string;
+          created_by?: string | null;
         };
         Update: {
           id?: number;
@@ -49,6 +51,7 @@ export interface Database {
           one_word?: string | null;
           is_me?: boolean;
           created_at?: string;
+          created_by?: string | null;
         };
         Relationships: [];
       };

@@ -16,11 +16,14 @@ interface HomePageProps {
   isAuthenticated: boolean;
   addLion: (formData: LionFormData) => Promise<void>;
   removeLion: () => Promise<void>;
+  removeLionById: (id: number) => Promise<void>;
   appendRandomLions: (count: number) => Promise<void>;
   refreshAll: () => Promise<void>;
   getRandomFormData: () => Promise<Lion>;
   runAction: (actionFn: () => Promise<void>) => Promise<void>;
   retry: () => void;
+  isOwnLion: (lion: Lion) => boolean;
+  canDelete: (lion: Lion) => boolean;
 }
 
 export default function HomePage({
@@ -32,11 +35,14 @@ export default function HomePage({
   isAuthenticated,
   addLion,
   removeLion,
+  removeLionById,
   appendRandomLions,
   refreshAll,
   getRandomFormData,
   runAction,
   retry,
+  isOwnLion,
+  canDelete,
 }: HomePageProps) {
   const { partFilter, sortOption, searchQuery, setPartFilter, setSortOption, setSearchQuery } =
     useViewOptions();
@@ -58,7 +64,6 @@ export default function HomePage({
 
   return (
     <>
-      {/* 비로그인 시 안내 메시지 */}
       {!isAuthenticated && (
         <div className="auth-notice">
           <p>
@@ -108,7 +113,12 @@ export default function HomePage({
         />
       )}
 
-      <ProfileCardGrid lions={visibleLions} />
+      <ProfileCardGrid
+        lions={visibleLions}
+        isOwnLion={isOwnLion}
+        canDelete={canDelete}
+        onDeleteLion={(id) => runAction(() => removeLionById(id))}
+      />
     </>
   );
 }

@@ -11,14 +11,16 @@ export default function App() {
     lions,
     isInitialLoading,
     addLion,
+    removeLion,
     removeLastLion,
     appendRandomLions,
     refreshAll,
     getRandomFormData,
-  } = useLions();
+    canDelete,
+    isOwnLion,
+  } = useLions({ userId: user?.id });
   const { isLoading, statusMessage, showRetry, runAction, retry } = useFetchStatus();
 
-  // 인증 상태 로딩 중
   if (isAuthLoading) {
     return (
       <main className="container">
@@ -29,7 +31,6 @@ export default function App() {
 
   return (
     <main className="container">
-      {/* 로그인 상태 표시 */}
       {isAuthenticated && (
         <header className="app-header">
           <span className="user-email">{user?.email}</span>
@@ -52,11 +53,14 @@ export default function App() {
               isAuthenticated={isAuthenticated}
               addLion={addLion}
               removeLion={removeLastLion}
+              removeLionById={removeLion}
               appendRandomLions={appendRandomLions}
               refreshAll={refreshAll}
               getRandomFormData={getRandomFormData}
               runAction={runAction}
               retry={retry}
+              isOwnLion={isOwnLion}
+              canDelete={canDelete}
             />
           }
         />
