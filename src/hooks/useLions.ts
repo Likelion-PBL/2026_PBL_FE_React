@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { lions as initialLions } from "../data/lions";
 import { fetchRandomUsers } from "../utils/api";
 import { createLionFromRandomUser, createLionFromFormData } from "../utils/lion";
-import type { Lion, LionFormData } from "../types/lion";
+import type { Lion, LionFormData, FetchStatus } from "../types/lion";
 
 const STATUS_MESSAGE_RESET_DELAY_MS = 900;
 
@@ -68,28 +68,21 @@ export function useLions() {
 type ActionFn = () => Promise<void>;
 
 export function useFetchStatus() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("준비 완료");
-  const [showRetry, setShowRetry] = useState(false);
+  const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ status: "idle" });
   const [lastAction, setLastAction] = useState<ActionFn | null>(null);
 
   async function runAction(actionFn: ActionFn): Promise<void> {
     setLastAction(() => actionFn);
-    setShowRetry(false);
-    setIsLoading(true);
-    setStatusMessage("불러오는 중...");
+    setFetchStatus({ status: "loading" });
 
     try {
       await actionFn();
-      setStatusMessage("완료!");
-      setTimeout(() => setStatusMessage("준비 완료"), STATUS_MESSAGE_RESET_DELAY_MS);
+      setFetchStatus({ status: "success" });
+      setTimeout(() => setFetchStatus({ status: "idle" }), STATUS_MESSAGE_RESET_DELAY_MS);
     } catch (error) {
       const message = error instanceof Error ? error.message : "알 수 없는 오류";
-      setStatusMessage(`실패: ${message}`);
-      setShowRetry(true);
+      setFetchStatus({ status: "error", error: message });
       console.error(error);
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -97,7 +90,7 @@ export function useFetchStatus() {
     if (lastAction) runAction(lastAction);
   }
 
-  return { isLoading, statusMessage, showRetry, runAction, retry };
+  return { fetchStatus, runAction, retry };
 }
 
 export function useViewOptions() {

@@ -4,13 +4,11 @@ import { filterAndSortLions } from "../utils/lion";
 import { ControlsSection, MainControls, FetchControls, ViewOptions } from "../components/Controls";
 import LionForm from "../components/LionForm";
 import ProfileCardGrid from "../components/ProfileCardGrid";
-import type { Lion, LionFormData } from "../types/lion";
+import type { Lion, LionFormData, FetchStatus } from "../types/lion";
 
 interface HomePageProps {
   lions: Lion[];
-  isLoading: boolean;
-  statusMessage: string;
-  showRetry: boolean;
+  fetchStatus: FetchStatus;
   addLion: (formData: LionFormData) => void;
   removeLion: () => void;
   appendRandomLions: (count: number) => Promise<void>;
@@ -22,9 +20,7 @@ interface HomePageProps {
 
 export default function HomePage({
   lions,
-  isLoading,
-  statusMessage,
-  showRetry,
+  fetchStatus,
   addLion,
   removeLion,
   appendRandomLions,
@@ -39,6 +35,8 @@ export default function HomePage({
   const [isFormVisible, setIsFormVisible] = useState(false);
 
   const visibleLions = filterAndSortLions(lions, { partFilter, sortOption, searchQuery });
+
+  const isLoading = fetchStatus.status === "loading";
 
   function handleAddLion(formData: LionFormData): void {
     addLion(formData);
@@ -56,9 +54,7 @@ export default function HomePage({
         />
 
         <FetchControls
-          isLoading={isLoading}
-          statusMessage={statusMessage}
-          showRetry={showRetry}
+          fetchStatus={fetchStatus}
           onAppendOne={() => runAction(() => appendRandomLions(1))}
           onAppendFive={() => runAction(() => appendRandomLions(5))}
           onRefreshAll={() => runAction(refreshAll)}

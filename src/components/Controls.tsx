@@ -1,4 +1,5 @@
 import type { ReactNode, ChangeEvent } from "react";
+import type { FetchStatus } from "../types/lion";
 
 interface ControlsSectionProps {
   children: ReactNode;
@@ -49,9 +50,7 @@ export function MainControls({
 }
 
 interface FetchControlsProps {
-  isLoading: boolean;
-  statusMessage: string;
-  showRetry: boolean;
+  fetchStatus: FetchStatus;
   onAppendOne: () => void;
   onAppendFive: () => void;
   onRefreshAll: () => void;
@@ -59,14 +58,28 @@ interface FetchControlsProps {
 }
 
 export function FetchControls({
-  isLoading,
-  statusMessage,
-  showRetry,
+  fetchStatus,
   onAppendOne,
   onAppendFive,
   onRefreshAll,
   onRetry,
 }: FetchControlsProps) {
+  // discriminated union 패턴: status에 따라 타입이 자동으로 좁혀짐
+  const isLoading = fetchStatus.status === "loading";
+
+  function getStatusMessage(): string {
+    switch (fetchStatus.status) {
+      case "idle":
+        return "준비 완료";
+      case "loading":
+        return "불러오는 중...";
+      case "success":
+        return "완료!";
+      case "error":
+        return `실패: ${fetchStatus.error}`;
+    }
+  }
+
   return (
     <div className="controls-row controls-row--secondary" aria-label="외부 데이터 불러오기">
       <button type="button" className="control-btn" onClick={onAppendOne} disabled={isLoading}>
@@ -80,10 +93,10 @@ export function FetchControls({
       </button>
 
       <p className="fetch-status" role="status" aria-live="polite">
-        {statusMessage}
+        {getStatusMessage()}
       </p>
 
-      {showRetry && (
+      {fetchStatus.status === "error" && (
         <button
           type="button"
           className="control-btn retry-btn"

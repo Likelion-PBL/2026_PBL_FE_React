@@ -7,7 +7,7 @@ export default function App() {
   const { lions, addLion, removeLion, appendRandomLions, refreshAll, getRandomFormData } =
     useLions();
 
-  const { isLoading, statusMessage, showRetry, runAction, retry } = useFetchStatus();
+  const { fetchStatus, runAction, retry } = useFetchStatus();
 
   return (
     <main className="container">
@@ -17,9 +17,7 @@ export default function App() {
           element={
             <HomePage
               lions={lions}
-              isLoading={isLoading}
-              statusMessage={statusMessage}
-              showRetry={showRetry}
+              fetchStatus={fetchStatus}
               addLion={addLion}
               removeLion={removeLion}
               appendRandomLions={appendRandomLions}
