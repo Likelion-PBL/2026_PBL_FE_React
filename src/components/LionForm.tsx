@@ -1,6 +1,20 @@
 import { useState, useEffect } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import type { Lion, LionFormData, Part } from "../types/lion";
 
-const INITIAL_FORM_STATE = {
+interface FormState {
+  name: string;
+  part: Part;
+  skills: string;
+  oneLineIntro: string;
+  description: string;
+  email: string;
+  phone: string;
+  website: string;
+  oneWord: string;
+}
+
+const INITIAL_FORM_STATE: FormState = {
   name: "",
   part: "Frontend",
   skills: "",
@@ -12,6 +26,15 @@ const INITIAL_FORM_STATE = {
   oneWord: "",
 };
 
+interface LionFormProps {
+  isVisible: boolean;
+  isLoading: boolean;
+  onSubmit: (formData: LionFormData) => void;
+  onCancel: () => void;
+  getRandomFormData: () => Promise<Lion>;
+  runAction: (actionFn: () => Promise<void>) => Promise<void>;
+}
+
 export default function LionForm({
   isVisible,
   isLoading,
@@ -19,11 +42,11 @@ export default function LionForm({
   onCancel,
   getRandomFormData,
   runAction,
-}) {
-  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
+}: LionFormProps) {
+  const [formData, setFormData] = useState<FormState>(INITIAL_FORM_STATE);
 
   useEffect(() => {
-    function handleKeyDown(e) {
+    function handleKeyDown(e: KeyboardEvent): void {
       if (e.key === "Escape" && isVisible) {
         onCancel();
       }
@@ -33,15 +56,15 @@ export default function LionForm({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isVisible, onCancel]);
 
-  function updateField(field, value) {
+  function updateField<K extends keyof FormState>(field: K, value: FormState[K]): void {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
-  function resetForm() {
+  function resetForm(): void {
     setFormData(INITIAL_FORM_STATE);
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>): void {
     e.preventDefault();
 
     const isFormValid =
@@ -61,12 +84,12 @@ export default function LionForm({
     resetForm();
   }
 
-  function handleCancel() {
+  function handleCancel(): void {
     resetForm();
     onCancel();
   }
 
-  async function handleFillRandom() {
+  async function handleFillRandom(): Promise<void> {
     await runAction(async () => {
       const randomData = await getRandomFormData();
       setFormData({
@@ -101,7 +124,7 @@ export default function LionForm({
           id="lionPart"
           label="파트"
           value={formData.part}
-          onChange={(value) => updateField("part", value)}
+          onChange={(value) => updateField("part", value as Part)}
           options={[
             { value: "Frontend", label: "Frontend" },
             { value: "Backend", label: "Backend" },
@@ -201,7 +224,17 @@ export default function LionForm({
   );
 }
 
-function FormField({ id, label, type, placeholder, value, onChange, fullWidth }) {
+interface FormFieldProps {
+  id: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+  fullWidth?: boolean;
+}
+
+function FormField({ id, label, type, placeholder, value, onChange, fullWidth }: FormFieldProps) {
   return (
     <div className={`form-row${fullWidth ? " form-row--full" : ""}`}>
       <label className="form-label" htmlFor={id}>
@@ -215,13 +248,26 @@ function FormField({ id, label, type, placeholder, value, onChange, fullWidth })
         placeholder={placeholder}
         required
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
       />
     </div>
   );
 }
 
-function FormSelect({ id, label, value, onChange, options }) {
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface FormSelectProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+}
+
+function FormSelect({ id, label, value, onChange, options }: FormSelectProps) {
   return (
     <div className="form-row">
       <label className="form-label" htmlFor={id}>
@@ -233,7 +279,7 @@ function FormSelect({ id, label, value, onChange, options }) {
         name={id}
         required
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -245,7 +291,15 @@ function FormSelect({ id, label, value, onChange, options }) {
   );
 }
 
-function FormTextarea({ id, label, placeholder, value, onChange }) {
+interface FormTextareaProps {
+  id: string;
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+function FormTextarea({ id, label, placeholder, value, onChange }: FormTextareaProps) {
   return (
     <div className="form-row form-row--full">
       <label className="form-label" htmlFor={id}>
@@ -255,11 +309,11 @@ function FormTextarea({ id, label, placeholder, value, onChange }) {
         className="form-input"
         id={id}
         name={id}
-        rows="4"
+        rows={4}
         placeholder={placeholder}
         required
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
       />
     </div>
   );

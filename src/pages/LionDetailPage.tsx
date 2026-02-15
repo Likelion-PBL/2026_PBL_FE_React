@@ -1,8 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
-import ProfileDetail from "../components/ProfileDetail.jsx";
+import ProfileDetail from "../components/ProfileDetail";
+import type { Lion } from "../types/lion";
 
-export default function LionDetailPage({ lions }) {
-  const { id } = useParams();
+interface LionDetailPageProps {
+  lions: Lion[];
+}
+
+export default function LionDetailPage({ lions }: LionDetailPageProps) {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const lion = lions.find((l) => String(l.id) === id);

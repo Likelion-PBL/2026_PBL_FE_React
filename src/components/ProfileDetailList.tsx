@@ -1,6 +1,11 @@
-import ProfileDetail from "./ProfileDetail.jsx";
+import ProfileDetail from "./ProfileDetail";
+import type { Lion } from "../types/lion";
 
-export default function ProfileDetailList({ lions }) {
+interface ProfileDetailListProps {
+  lions: Lion[];
+}
+
+export default function ProfileDetailList({ lions }: ProfileDetailListProps) {
   if (!lions || lions.length === 0) {
     return (
       <section className="profile-detail-list">
@@ -18,6 +23,10 @@ export default function ProfileDetailList({ lions }) {
   );
 }
 
-function EmptyState({ message }) {
+interface EmptyStateProps {
+  message: string;
+}
+
+function EmptyState({ message }: EmptyStateProps) {
   return <div className="empty-state">{message}</div>;
 }

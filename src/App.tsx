@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
-import { useLions, useFetchStatus } from "./hooks/useLions.js";
-import HomePage from "./pages/HomePage.jsx";
-import LionDetailPage from "./pages/LionDetailPage.jsx";
+import { useLions, useFetchStatus } from "./hooks/useLions";
+import HomePage from "./pages/HomePage";
+import LionDetailPage from "./pages/LionDetailPage";
 
 export default function App() {
   const { lions, addLion, removeLion, appendRandomLions, refreshAll, getRandomFormData } =

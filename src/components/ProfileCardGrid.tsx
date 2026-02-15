@@ -1,6 +1,11 @@
-import ProfileCard from "./ProfileCard.jsx";
+import ProfileCard from "./ProfileCard";
+import type { Lion } from "../types/lion";
 
-export default function ProfileCardGrid({ lions }) {
+interface ProfileCardGridProps {
+  lions: Lion[];
+}
+
+export default function ProfileCardGrid({ lions }: ProfileCardGridProps) {
   if (!lions || lions.length === 0) {
     return (
       <section className="profile-card-grid">
@@ -18,6 +23,10 @@ export default function ProfileCardGrid({ lions }) {
   );
 }
 
-function EmptyState({ message }) {
+interface EmptyStateProps {
+  message: string;
+}
+
+function EmptyState({ message }: EmptyStateProps) {
   return <div className="empty-state">{message}</div>;
 }

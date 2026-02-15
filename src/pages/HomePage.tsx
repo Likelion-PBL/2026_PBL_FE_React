@@ -1,9 +1,24 @@
 import { useState } from "react";
-import { useViewOptions } from "../hooks/useLions.js";
-import { filterAndSortLions } from "../utils/lion.js";
-import { ControlsSection, MainControls, FetchControls, ViewOptions } from "../components/Controls.jsx";
-import LionForm from "../components/LionForm.jsx";
-import ProfileCardGrid from "../components/ProfileCardGrid.jsx";
+import { useViewOptions } from "../hooks/useLions";
+import { filterAndSortLions } from "../utils/lion";
+import { ControlsSection, MainControls, FetchControls, ViewOptions } from "../components/Controls";
+import LionForm from "../components/LionForm";
+import ProfileCardGrid from "../components/ProfileCardGrid";
+import type { Lion, LionFormData } from "../types/lion";
+
+interface HomePageProps {
+  lions: Lion[];
+  isLoading: boolean;
+  statusMessage: string;
+  showRetry: boolean;
+  addLion: (formData: LionFormData) => void;
+  removeLion: () => void;
+  appendRandomLions: (count: number) => Promise<void>;
+  refreshAll: () => Promise<void>;
+  getRandomFormData: () => Promise<Lion>;
+  runAction: (actionFn: () => Promise<void>) => Promise<void>;
+  retry: () => void;
+}
 
 export default function HomePage({
   lions,
@@ -17,7 +32,7 @@ export default function HomePage({
   getRandomFormData,
   runAction,
   retry,
-}) {
+}: HomePageProps) {
   const { partFilter, sortOption, searchQuery, setPartFilter, setSortOption, setSearchQuery } =
     useViewOptions();
 
@@ -25,7 +40,7 @@ export default function HomePage({
 
   const visibleLions = filterAndSortLions(lions, { partFilter, sortOption, searchQuery });
 
-  function handleAddLion(formData) {
+  function handleAddLion(formData: LionFormData): void {
     addLion(formData);
     setIsFormVisible(false);
   }

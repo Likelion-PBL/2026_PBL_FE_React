@@ -1,4 +1,10 @@
-export function ControlsSection({ children }) {
+import type { ReactNode, ChangeEvent } from "react";
+
+interface ControlsSectionProps {
+  children: ReactNode;
+}
+
+export function ControlsSection({ children }: ControlsSectionProps) {
   return (
     <section className="controls" aria-label="명단 조작">
       {children}
@@ -6,7 +12,19 @@ export function ControlsSection({ children }) {
   );
 }
 
-export function MainControls({ totalCount, isLoading, onToggleForm, onRemoveLion }) {
+interface MainControlsProps {
+  totalCount: number;
+  isLoading: boolean;
+  onToggleForm: () => void;
+  onRemoveLion: () => void;
+}
+
+export function MainControls({
+  totalCount,
+  isLoading,
+  onToggleForm,
+  onRemoveLion,
+}: MainControlsProps) {
   return (
     <div className="controls-row">
       <button
@@ -30,6 +48,16 @@ export function MainControls({ totalCount, isLoading, onToggleForm, onRemoveLion
   );
 }
 
+interface FetchControlsProps {
+  isLoading: boolean;
+  statusMessage: string;
+  showRetry: boolean;
+  onAppendOne: () => void;
+  onAppendFive: () => void;
+  onRefreshAll: () => void;
+  onRetry: () => void;
+}
+
 export function FetchControls({
   isLoading,
   statusMessage,
@@ -38,7 +66,7 @@ export function FetchControls({
   onAppendFive,
   onRefreshAll,
   onRetry,
-}) {
+}: FetchControlsProps) {
   return (
     <div className="controls-row controls-row--secondary" aria-label="외부 데이터 불러오기">
       <button type="button" className="control-btn" onClick={onAppendOne} disabled={isLoading}>
@@ -69,6 +97,15 @@ export function FetchControls({
   );
 }
 
+interface ViewOptionsProps {
+  partFilter: string;
+  sortOption: string;
+  searchQuery: string;
+  onPartFilterChange: (value: string) => void;
+  onSortChange: (value: string) => void;
+  onSearchChange: (value: string) => void;
+}
+
 export function ViewOptions({
   partFilter,
   sortOption,
@@ -76,7 +113,7 @@ export function ViewOptions({
   onPartFilterChange,
   onSortChange,
   onSearchChange,
-}) {
+}: ViewOptionsProps) {
   return (
     <div className="controls-row controls-row--secondary" aria-label="보기 옵션">
       <label className="control-label" htmlFor="partFilter">
@@ -86,7 +123,7 @@ export function ViewOptions({
         className="control-input"
         id="partFilter"
         value={partFilter}
-        onChange={(e) => onPartFilterChange(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) => onPartFilterChange(e.target.value)}
       >
         <option value="ALL">전체</option>
         <option value="Frontend">Frontend</option>
@@ -101,7 +138,7 @@ export function ViewOptions({
         className="control-input"
         id="sortSelect"
         value={sortOption}
-        onChange={(e) => onSortChange(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) => onSortChange(e.target.value)}
       >
         <option value="latest">최신추가순</option>
         <option value="name">이름순</option>
@@ -117,7 +154,7 @@ export function ViewOptions({
         placeholder="이름으로 검색"
         autoComplete="off"
         value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
       />
     </div>
   );

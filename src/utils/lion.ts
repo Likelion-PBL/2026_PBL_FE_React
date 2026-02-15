@@ -1,19 +1,21 @@
-const SKILLS_BY_PART = {
+import type { Lion, Part, LionFormData, RandomUser, ViewOptionsState } from "../types/lion";
+
+const SKILLS_BY_PART: Record<Part, string[]> = {
   Backend: ["Node.js", "Spring", "Database"],
   Design: ["Figma", "Typography", "Design System"],
   Frontend: ["JavaScript", "React", "HTML/CSS"],
 };
 
-const PARTS = ["Frontend", "Backend", "Design"];
+const PARTS: Part[] = ["Frontend", "Backend", "Design"];
 
-export function parseSkills(input) {
+export function parseSkills(input: string | undefined): string[] {
   return String(input || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 }
 
-function pickPart(seedStr) {
+function pickPart(seedStr: string | undefined): Part {
   const seed = String(seedStr || "");
   let sum = 0;
   for (let i = 0; i < seed.length; i++) {
@@ -22,11 +24,11 @@ function pickPart(seedStr) {
   return PARTS[sum % PARTS.length];
 }
 
-function getSkillsByPart(part) {
+function getSkillsByPart(part: Part): string[] {
   return SKILLS_BY_PART[part] || SKILLS_BY_PART.Frontend;
 }
 
-export function createLionFromRandomUser(user, id) {
+export function createLionFromRandomUser(user: RandomUser, id: number): Lion {
   const name = `${user?.name?.first || "Baby"} ${user?.name?.last || "Lion"}`;
   const part = pickPart(user?.login?.uuid || String(id));
   const skills = getSkillsByPart(part);
@@ -44,7 +46,7 @@ export function createLionFromRandomUser(user, id) {
     description: [
       "6주차 미션에서 useState와 useEffect로 상태를 관리하는 연습을 하고 있습니다.",
       "React의 상태가 변하면 UI가 자동으로 다시 렌더링되는 흐름을 이해하려고 합니다.",
-      '목표는 "상태가 UI를 만든다"는 React의 핵심 원리를 체득하는 것입니다.',
+      '"상태가 UI를 만든다"는 React의 핵심 원리를 체득하는 것입니다.',
     ].join(" "),
     oneWord: "상태가 바뀌면 UI도 바뀐다!",
     imgSrc: user?.picture?.large || `https://picsum.photos/seed/${id}/200/200`,
@@ -57,7 +59,7 @@ export function createLionFromRandomUser(user, id) {
   };
 }
 
-export function createLionFromFormData(formData, id) {
+export function createLionFromFormData(formData: LionFormData, id: number): Lion {
   const skills = parseSkills(formData.skills);
 
   return {
@@ -79,7 +81,10 @@ export function createLionFromFormData(formData, id) {
   };
 }
 
-export function filterAndSortLions(lions, { partFilter, sortOption, searchQuery }) {
+export function filterAndSortLions(
+  lions: Lion[],
+  { partFilter, sortOption, searchQuery }: ViewOptionsState
+): Lion[] {
   let result = [...lions];
 
   if (partFilter !== "ALL") {
@@ -90,7 +95,7 @@ export function filterAndSortLions(lions, { partFilter, sortOption, searchQuery 
   if (query) {
     result = result.filter((lion) => lion.name.toLowerCase().includes(query));
   }
-  
+
   if (sortOption === "name") {
     result.sort((a, b) => a.name.localeCompare(b.name));
   } else {

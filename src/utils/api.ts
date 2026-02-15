@@ -1,7 +1,9 @@
+import type { RandomUser } from "../types/lion";
+
 const RANDOM_USER_API_URL = "https://randomuser.me/api/";
 const SUPPORTED_NATIONALITIES = "us,gb,ca,au,nz";
 
-export async function fetchRandomUsers(count) {
+export async function fetchRandomUsers(count: number): Promise<RandomUser[]> {
   const url = `${RANDOM_USER_API_URL}?results=${count}&nat=${SUPPORTED_NATIONALITIES}`;
   const response = await fetch(url);
 
